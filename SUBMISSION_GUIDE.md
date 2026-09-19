@@ -74,7 +74,7 @@ Dear GUVI HCL Hiring Team,
 I have completed the Live Polling Tool internship task according to all specified requirements.
 
 1. GitHub Repository: https://github.com/[your-username]/live-polling-app
-2. Live Deployed Link: https://[your-app].vercel.app (or onrender.com)
+2. Live Deployed Link: https://course-test-franchise-carry.trycloudflare.com
 3. Walkthrough Video (3-5 min): [Paste YouTube unlisted or Google Drive link]
 
 Key Stack Highlights:

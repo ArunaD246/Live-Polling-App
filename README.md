@@ -7,9 +7,10 @@ Live demo flow: **Create poll → Share link/QR code → Audience votes → Real
 ---
 
 ## 🚀 Live Deployed Link & Public Demo
-- **Live Frontend**: Deployable to [Render](https://render.com) / [Vercel](https://vercel.com) (see [Deployment Guide](#-deployment-to-live-link))
-- **Live Backend**: Render Web Service running Go (Gin) + WebSocket server
-- **Repository**: Public GitHub Repository
+- **Live Direct Link (Publicly Reachable Everywhere)**: **[https://course-test-franchise-carry.trycloudflare.com](https://course-test-franchise-carry.trycloudflare.com)**
+- **Sample Live Poll Voting Link**: **[https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4](https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4)**
+- **Sample Live Results Link**: **[https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4/results](https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4/results)**
+
 
 ---
 
