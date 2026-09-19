@@ -7,9 +7,8 @@ Live demo flow: **Create poll → Share link/QR code → Audience votes → Real
 ---
 
 ## 🚀 Live Deployed Link & Public Demo
-- **Live Direct Link (Publicly Reachable Everywhere)**: **[https://course-test-franchise-carry.trycloudflare.com](https://course-test-franchise-carry.trycloudflare.com)**
-- **Sample Live Poll Voting Link**: **[https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4](https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4)**
-- **Sample Live Results Link**: **[https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4/results](https://course-test-franchise-carry.trycloudflare.com/poll/6aae03c9d896df79d8ee9cd4/results)**
+- **Official Live Link (Vercel)**: **[https://live-polling-app-khaki.vercel.app](https://live-polling-app-khaki.vercel.app)**
+- **Public GitHub Repository**: **[https://github.com/ArunaD246/Live-Polling-App](https://github.com/ArunaD246/Live-Polling-App)**
 
 
 ---
