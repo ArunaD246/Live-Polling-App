@@ -20,6 +20,7 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates tzdata
 
 COPY --from=builder /app/server .
+COPY --from=builder /app/dist ./dist
 
 EXPOSE 8080
 ENV PORT=8080

@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: live-polling-backend
+    name: live-polling-app
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     plan: free
     envVars:
       - key: PORT

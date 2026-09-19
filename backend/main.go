@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"backend/config"
 	"backend/database"
@@ -68,6 +69,27 @@ func main() {
 
 	// Real-time WebSocket Endpoint
 	r.GET("/ws/polls/:id", handlers.HandleWebSocket)
+
+	// Serve React Frontend (Single-Page App) if dist folder is present
+	if _, err := os.Stat("./dist"); err == nil {
+		log.Println("Serving production React frontend from ./dist")
+		r.Static("/assets", "./dist/assets")
+		if _, err := os.Stat("./dist/vite.svg"); err == nil {
+			r.StaticFile("/vite.svg", "./dist/vite.svg")
+		}
+		r.NoRoute(func(c *gin.Context) {
+			path := c.Request.URL.Path
+			if len(path) >= 4 && path[:4] == "/api" {
+				c.JSON(http.StatusNotFound, gin.H{"error": "API route not found"})
+				return
+			}
+			if len(path) >= 3 && path[:3] == "/ws" {
+				c.JSON(http.StatusNotFound, gin.H{"error": "WebSocket route not found"})
+				return
+			}
+			c.File("./dist/index.html")
+		})
+	}
 
 	log.Printf("Server listening on port %s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
