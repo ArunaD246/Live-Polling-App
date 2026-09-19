@@ -12,14 +12,9 @@ export const getUser = () => {
 export const setUser = (user) => localStorage.setItem('user', JSON.stringify(user));
 export const removeUser = () => localStorage.removeItem('user');
 
-// Generate or retrieve anonymous voter fingerprint
+// Generate unique voter token for audience voting (supports testing multiple responses from same device)
 export const getVoterFingerprint = () => {
-  let fp = localStorage.getItem('pulsepoll_voter_fp');
-  if (!fp) {
-    fp = 'fp_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now().toString(36);
-    localStorage.setItem('pulsepoll_voter_fp', fp);
-  }
-  return fp;
+  return 'fp_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now().toString(36);
 };
 
 // Check if current device has recorded a vote on a poll

@@ -211,9 +211,19 @@ export default function PollVote() {
               <CheckCircle2 size={20} />
               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Your vote has been counted!</span>
             </div>
-            <Link to={`/poll/${id}/results`} className="btn-primary" style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}>
-              View Results Live
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => { setAlreadyVoted(false); setSelectedOptions([]); }}
+                className="btn-secondary"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}
+              >
+                Vote Again / Change
+              </button>
+              <Link to={`/poll/${id}/results`} className="btn-primary" style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}>
+                View Results Live
+              </Link>
+            </div>
           </div>
         )}
 
