@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://course-test-franchise-carry.trycloudflare.com/api/:match*"
+      "destination": "https://minneapolis-career-hook-ecommerce.trycloudflare.com/api/:match*"
     },
     {
       "source": "/ws/:match*",
-      "destination": "https://course-test-franchise-carry.trycloudflare.com/ws/:match*"
+      "destination": "https://minneapolis-career-hook-ecommerce.trycloudflare.com/ws/:match*"
     },
     {
       "source": "/(.*)",
