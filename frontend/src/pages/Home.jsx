@@ -1,235 +1,263 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, Zap, ShieldCheck, BarChart3, Users, QrCode, Radio } from 'lucide-react';
-import { getAuthToken } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Sparkles, BarChart2, Radio, Zap } from 'lucide-react';
+import { getUser } from '../services/api';
 
-export default function Home() {
-  const [pollCode, setPollCode] = useState('');
-  const navigate = useNavigate();
-  const token = getAuthToken();
+function PreviewBar({ label, text, pct, color, delay = 0 }) {
+  const [width, setWidth] = useState(0);
 
-  const handleJoinPoll = (e) => {
-    e.preventDefault();
-    if (!pollCode.trim()) return;
-    // Extract ID if a full URL was pasted
-    let id = pollCode.trim();
-    if (id.includes('/poll/')) {
-      id = id.split('/poll/')[1].split('/')[0];
-    }
-    navigate(`/poll/${id}`);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setWidth(pct);
+    }, 100 + delay);
+    return () => clearTimeout(timer);
+  }, [pct, delay]);
 
   return (
-    <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '3rem 1.5rem 6rem 1.5rem' }}>
-      {/* Hero Section */}
-      <div style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: '#eef2ff',
-          border: '1px solid #c7d2fe',
-          borderRadius: '9999px',
-          padding: '0.4rem 1.25rem',
-          fontSize: '0.85rem',
-          fontWeight: 600,
-          color: '#4f46e5',
-          marginBottom: '1.5rem',
-          boxShadow: '0 2px 6px rgba(79, 70, 229, 0.08)',
-        }}>
-          <Sparkles size={16} color="#4f46e5" />
-          <span>Powered by Go, Gin, Redis Pub/Sub & MongoDB</span>
-        </div>
-
-        <h1 style={{
-          fontSize: 'clamp(2.4rem, 5vw, 3.8rem)',
-          fontWeight: 800,
-          letterSpacing: '-0.03em',
-          marginBottom: '1.25rem',
-          lineHeight: 1.15,
-          color: 'var(--text-main)',
-        }}>
-          Live Polling that updates <br />
-          <span style={{
-            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #0284c7 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            instantly, with zero page reloads.
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs font-semibold">
+        <span className="text-slate-700 flex items-center gap-2">
+          <span
+            className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold text-white shadow-2xs"
+            style={{ backgroundColor: color }}
+          >
+            {label}
           </span>
-        </h1>
-
-        <p style={{
-          fontSize: '1.15rem',
-          color: 'var(--text-muted)',
-          maxWidth: '680px',
-          margin: '0 auto 2.5rem auto',
-        }}>
-          Create a live poll, share the interactive QR or link with your audience, and watch the results stream in real-time driven by Redis sub-millisecond atomic events.
-        </p>
-
-        {/* Call to Actions */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1rem',
-          flexWrap: 'wrap',
-          marginBottom: '3rem',
-        }}>
-          <Link to={token ? "/create" : "/register"} className="btn-primary" style={{ padding: '0.9rem 2rem', fontSize: '1.05rem' }}>
-            <span>{token ? "Create a Live Poll" : "Get Started Free"}</span>
-            <ArrowRight size={18} />
-          </Link>
-
-          <Link to={token ? "/dashboard" : "/login"} className="btn-secondary" style={{ padding: '0.9rem 1.8rem', fontSize: '1.05rem' }}>
-            <span>{token ? "Go to Dashboard" : "Sign In"}</span>
-          </Link>
-        </div>
-
-        {/* Enter Poll ID Code Box */}
-        <form onSubmit={handleJoinPoll} style={{
-          maxWidth: '480px',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '0.5rem',
-          background: '#ffffff',
-          border: '1px solid var(--border-subtle)',
-          padding: '0.4rem',
-          borderRadius: '16px',
-          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
-        }}>
-          <input
-            type="text"
-            placeholder="Have a Poll Code or Link? Paste it here..."
-            value={pollCode}
-            onChange={(e) => setPollCode(e.target.value)}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              padding: '0.75rem 1rem',
-              color: 'var(--text-main)',
-              fontSize: '0.95rem',
-            }}
-          />
-          <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.4rem' }}>
-            <span>Join Poll</span>
-          </button>
-        </form>
+          <span className="truncate">{text}</span>
+        </span>
+        <span className="text-slate-500 font-bold">{pct}%</span>
       </div>
+      <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+        <div
+          className="h-full rounded-full transition-all duration-1000 ease-out"
+          style={{
+            width: `${width}%`,
+            backgroundColor: color,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
-      {/* 4-Step Interactive Flow Section */}
-      <div style={{ marginBottom: '5rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>How PulsePoll Works</h2>
-          <p style={{ color: 'var(--text-muted)' }}>The complete end-to-end interactive flow</p>
-        </div>
+export default function Home() {
+  const user = getUser();
+  const [pulseCount, setPulseCount] = useState(24);
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '1.5rem',
-        }}>
-          {[
-            {
-              step: '01',
-              title: 'Create Poll',
-              desc: 'Authenticated creators set questions, options, expiration, and voting rules.',
-              icon: <Zap size={22} color="#4f46e5" />,
-            },
-            {
-              step: '02',
-              title: 'Share Link / QR',
-              desc: 'One-click shareable link and dynamic scannable QR codes for mobile audiences.',
-              icon: <QrCode size={22} color="#7c3aed" />,
-            },
-            {
-              step: '03',
-              title: 'Audience Votes',
-              desc: 'Voters cast selections instantly with duplicate vote guards and smooth animations.',
-              icon: <Users size={22} color="#0284c7" />,
-            },
-            {
-              step: '04',
-              title: 'Live Realtime Results',
-              desc: 'Redis Pub/Sub broadcasts vote deltas to all WebSockets with zero page refresh.',
-              icon: <BarChart3 size={22} color="#059669" />,
-            },
-          ].map((item, idx) => (
-            <div key={idx} className="glass-card" style={{ padding: '1.75rem', position: 'relative' }}>
-              <div style={{
-                position: 'absolute',
-                top: '1.25rem',
-                right: '1.25rem',
-                fontSize: '1.8rem',
-                fontWeight: 800,
-                color: 'rgba(15, 23, 42, 0.08)',
-              }}>
-                {item.step}
-              </div>
-              <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: '#f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '1rem',
-              }}>
-                {item.icon}
-              </div>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>{item.title}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>{item.desc}</p>
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPulseCount((prev) => (prev < 99 ? prev + 1 : 24));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const features = [
+    {
+      icon: '🚀',
+      title: 'Launch a live poll',
+      desc: 'Create instant, engaging questions and collect real-time responses from your audience without complicated setups.',
+    },
+    {
+      icon: '📊',
+      title: 'Track reactions',
+      desc: 'Watch live updates powered by Redis Pub/Sub and share the current momentum on the results view in real time.',
+    },
+    {
+      icon: '🎯',
+      title: 'Keep it simple',
+      desc: 'A clean polling flow for events, product feedback, classroom polls, and team decisions with instant QR codes.',
+    },
+  ];
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 40%, #f8fbff 100%)',
+      }}
+    >
+      {/* Background Dot Pattern */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, #bfdbfe 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+          opacity: 0.3,
+        }}
+      />
+
+      {/* Hero Section */}
+      <section className="relative max-w-6xl mx-auto px-6 pt-16 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left Column: Headline & Action */}
+          <div>
+            {/* Pill Badges */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              {['Live updates', 'Realtime voting', 'Responsive UI'].map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold border border-blue-200 shadow-2xs"
+                >
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                  {tag}
+                </span>
+              ))}
             </div>
-          ))}
+
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-tight mb-6 tracking-tight">
+              Turn every decision into a{' '}
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-blue-600 to-sky-500 bg-clip-text text-transparent">
+                  shared moment.
+                </span>
+                <svg
+                  className="absolute -bottom-1 left-0 w-full"
+                  viewBox="0 0 200 8"
+                  fill="none"
+                >
+                  <path
+                    d="M0 6 Q50 0 100 5 Q150 10 200 4"
+                    stroke="#3b82f6"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    fill="none"
+                    opacity="0.4"
+                  />
+                </svg>
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg text-slate-500 leading-relaxed mb-10 max-w-lg">
+              Spark engagement with fast, polished polls that update in real time and let your audience vote without friction.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                to={user ? '/create' : '/register'}
+                className="group inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-md shadow-blue-200"
+              >
+                <span>Create a poll</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-blue-50 text-slate-700 font-bold text-sm border border-blue-200 transition-all shadow-xs"
+                >
+                  My Dashboard
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-blue-50 text-slate-700 font-bold text-sm border border-blue-200 transition-all shadow-xs"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Live Interactive Poll Preview Card */}
+          <div className="relative">
+            {/* Top-left Floating Badge */}
+            <div className="absolute -top-4 -left-4 z-10 bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-lg flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-sky-400 flex items-center justify-center shadow-xs">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Audience pulse</p>
+                <p className="text-sm font-black text-slate-900">98% engagement</p>
+              </div>
+            </div>
+
+            {/* Main Interactive Preview Card */}
+            <div className="bg-white rounded-3xl border border-blue-100 shadow-xl shadow-blue-100/50 p-6 sm:p-8 relative">
+              <div className="flex items-center justify-between mb-5">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                  Open poll
+                </span>
+                <span className="text-xs text-slate-400 font-medium">{pulseCount} votes</span>
+              </div>
+
+              <h3 className="text-xl font-black text-slate-900 mb-6">
+                What should we launch next?
+              </h3>
+
+              <div className="space-y-4 mb-6">
+                <PreviewBar label="A" text="Real-time WebSocket Live Charts" pct={54} color="#3b82f6" delay={0} />
+                <PreviewBar label="B" text="Instant Mobile QR Scanning" pct={31} color="#8b5cf6" delay={150} />
+                <PreviewBar label="C" text="Export Analytics & CSV Report" pct={15} color="#10b981" delay={300} />
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live results • updates in real-time
+                </span>
+                <div className="flex -space-x-1.5">
+                  {['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'].map((bg, idx) => (
+                    <div
+                      key={idx}
+                      className="w-5 h-5 rounded-full border-2 border-white shadow-2xs"
+                      style={{ background: bg }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom-right Floating Notification Badge */}
+            <div className="absolute -bottom-3 -right-4 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 shadow-lg flex items-center gap-2.5">
+              <span className="text-base">⚡</span>
+              <div>
+                <p className="text-xs font-bold text-slate-900">New vote!</p>
+                <p className="text-[10px] text-slate-400">Option A • just now</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Tech Stack & Architecture Highlight */}
-      <div className="glass-panel" style={{ padding: '2.5rem', background: '#ffffff' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.6rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>Engineered for True Real-Time Performance</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Built strictly to the required specifications, where every piece of the stack does meaningful work.
-          </p>
-        </div>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: '1.25rem',
-        }}>
-          <div style={{ padding: '1.25rem', borderRadius: '12px', background: '#f8fafc', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ color: '#0284c7', fontWeight: 700, marginBottom: '0.25rem' }}>React Frontend</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              Modern modular client with WebSocket listeners, reactive animated progress gauges, and mobile-first audience view.
-            </p>
-          </div>
-
-          <div style={{ padding: '1.25rem', borderRadius: '12px', background: '#f8fafc', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ color: '#4f46e5', fontWeight: 700, marginBottom: '0.25rem' }}>Go (Gin) Backend</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              High-concurrency compiled backend with strict input validation, JWT auth, and WebSocket connection hub.
-            </p>
-          </div>
-
-          <div style={{ padding: '1.25rem', borderRadius: '12px', background: '#f8fafc', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ color: '#e11d48', fontWeight: 700, marginBottom: '0.25rem' }}>Redis Realtime Bus</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              Drives atomic in-memory vote counters (<code style={{ color: '#b91c1c', background: '#fee2e2', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>HINCRBY</code>) and instant event fanout via Redis Pub/Sub.
-            </p>
-          </div>
-
-          <div style={{ padding: '1.25rem', borderRadius: '12px', background: '#f8fafc', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ color: '#059669', fontWeight: 700, marginBottom: '0.25rem' }}>MongoDB Database</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              Durable document storage for user accounts, poll schemas, and tamper-proof vote audit logs with unique indexes.
-            </p>
+      {/* Features Section */}
+      <section
+        className="border-t border-blue-100"
+        style={{ background: 'linear-gradient(180deg, #ffffff 0%, #eff6ff 100%)' }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((item) => (
+              <div
+                key={item.title}
+                className="group p-6 rounded-2xl bg-white border border-blue-100 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/60 transition-all duration-300"
+              >
+                <span className="text-2xl mb-4 block">{item.icon}</span>
+                <h3 className="font-black text-slate-900 mb-2 text-base">{item.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Conversion CTA Section */}
+      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-3xl font-black text-slate-900 mb-4">Ready to run your first poll?</h2>
+        <p className="text-slate-500 mb-8 max-w-md mx-auto">
+          Free to use. No credit card required. Start creating polls in 30 seconds.
+        </p>
+        <Link
+          to={user ? '/create' : '/register'}
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-200 transition-all"
+        >
+          <span>{user ? 'Create a poll' : 'Get started free'}</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </section>
     </div>
   );
 }

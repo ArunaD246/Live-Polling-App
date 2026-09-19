@@ -1,194 +1,141 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Copy, Check, Share2, ExternalLink, MessageCircle, Send } from 'lucide-react';
+import { X, Share2, Copy, Check, ExternalLink } from 'lucide-react';
 
 export default function ShareModal({ poll, isOpen, onClose }) {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !poll) return null;
 
-  const voteUrl = `${window.location.origin}/poll/${poll.id}`;
-  const resultsUrl = `${window.location.origin}/poll/${poll.id}/results`;
+  const pollId = poll.slug || poll.id || poll._id;
+  const shareUrl = `${window.location.origin}/poll/${pollId}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(voteUrl);
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2500);
   };
 
-  const shareWhatsApp = () => {
-    const text = encodeURIComponent(`Vote on this live poll: "${poll.question}"\n${voteUrl}`);
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
-  };
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedTitle = encodeURIComponent(`Vote on: "${poll.question}" on LivePoll!`);
 
-  const shareTwitter = () => {
-    const text = encodeURIComponent(`Vote on this live poll: "${poll.question}"`);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(voteUrl)}`, '_blank');
-  };
-
-  const shareTelegram = () => {
-    const text = encodeURIComponent(`Vote on this live poll: "${poll.question}"`);
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(voteUrl)}&text=${text}`, '_blank');
-  };
+  const shareLinks = [
+    {
+      name: 'WhatsApp',
+      url: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+      color: 'bg-emerald-500 hover:bg-emerald-600 text-white',
+      icon: (
+        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+        </svg>
+      )
+    },
+    {
+      name: 'X (Twitter)',
+      url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+      color: 'bg-slate-900 hover:bg-black text-white',
+      icon: (
+        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      )
+    },
+    {
+      name: 'LinkedIn',
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      color: 'bg-blue-600 hover:bg-blue-700 text-white',
+      icon: (
+        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63 0 .9.73 1.63 1.63 1.63.9 0 1.63-.73 1.63-1.63 0-.9-.73-1.63-1.63-1.63z"/>
+        </svg>
+      )
+    }
+  ];
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 100,
-      background: 'rgba(15, 23, 42, 0.45)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-    }}>
-      <div className="glass-panel animate-fade-in" style={{
-        maxWidth: '480px',
-        width: '100%',
-        padding: '2rem',
-        position: 'relative',
-        background: '#ffffff',
-        border: '1px solid var(--border-subtle)',
-        boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.18)',
-      }}>
-        {/* Close Button */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+      <div className="relative w-full max-w-md p-6 glass-card rounded-2xl shadow-xl border border-slate-200 text-slate-800">
         <button
           onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '1.25rem',
-            right: '1.25rem',
-            background: '#f1f5f9',
-            border: 'none',
-            color: 'var(--text-muted)',
-            borderRadius: '50%',
-            padding: '0.45rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 p-1.5 rounded-lg hover:bg-slate-100 transition"
+          aria-label="Close"
         >
-          <X size={18} />
+          <X className="w-5 h-5" />
         </button>
 
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'rgba(79, 70, 229, 0.1)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '0.75rem',
-            color: 'var(--accent-primary)',
-          }}>
-            <Share2 size={24} />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-600">
+            <Share2 className="w-6 h-6" />
           </div>
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.35rem', color: 'var(--text-main)' }}>Share Live Poll</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '340px', margin: '0 auto' }}>
-            Audience can scan the QR code or click the link to vote immediately.
-          </p>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">Share Live Poll</h3>
+            <p className="text-xs text-slate-500">Anyone with this link can cast their vote</p>
+          </div>
         </div>
 
-        {/* QR Code Container */}
-        <div style={{
-          background: '#ffffff',
-          padding: '1.25rem',
-          borderRadius: '16px',
-          width: 'fit-content',
-          margin: '0 auto 1.5rem auto',
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 4px 16px rgba(15, 23, 42, 0.06)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-          <QRCodeSVG
-            value={voteUrl}
-            size={180}
-            bgColor={"#ffffff"}
-            fgColor={"#0f172a"}
-            level={"M"}
-            includeMargin={false}
-          />
+        {/* Poll Question Context */}
+        <div className="mb-5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p className="text-xs font-medium text-slate-500 mb-1">Poll Question</p>
+          <p className="text-sm font-semibold text-slate-900 line-clamp-2">{poll.question}</p>
         </div>
 
-        {/* Copy Link Input */}
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          marginBottom: '1.5rem',
-          background: '#f8fafc',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: '12px',
-          padding: '0.35rem',
-        }}>
-          <input
-            type="text"
-            readOnly
-            value={voteUrl}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              padding: '0.5rem 0.75rem',
-              color: 'var(--text-main)',
-              fontSize: '0.85rem',
-            }}
-          />
-          <button
-            onClick={handleCopy}
-            className="btn-primary"
-            style={{
-              padding: '0.5rem 1rem',
-              fontSize: '0.85rem',
-              borderRadius: '8px',
-            }}
-          >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
-            <span>{copied ? 'Copied!' : 'Copy'}</span>
-          </button>
+        {/* Shareable Link Input */}
+        <div className="mb-5">
+          <label className="block text-xs font-semibold text-slate-700 mb-2">Shareable Link</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              readOnly
+              value={shareUrl}
+              className="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs font-mono text-slate-800 select-all"
+            />
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-xs transition-all shrink-0 ${
+                copied
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" /> Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" /> Copy Link
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Share buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
-          <button onClick={shareWhatsApp} className="btn-secondary" style={{ padding: '0.55rem', fontSize: '0.8rem' }}>
-            <MessageCircle size={15} color="#16a34a" />
-            <span>WhatsApp</span>
-          </button>
-          <button onClick={shareTwitter} className="btn-secondary" style={{ padding: '0.55rem', fontSize: '0.8rem' }}>
-            <Send size={15} color="#0284c7" />
-            <span>Twitter/X</span>
-          </button>
-          <button onClick={shareTelegram} className="btn-secondary" style={{ padding: '0.55rem', fontSize: '0.8rem' }}>
-            <Send size={15} color="#2563eb" />
-            <span>Telegram</span>
-          </button>
+        {/* QR Code Section for Mobile Scanning */}
+        <div className="mb-5 flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+          <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs mb-2">
+            <QRCodeSVG value={shareUrl} size={130} level="M" />
+          </div>
+          <span className="text-[11px] font-medium text-slate-500">Scan QR with any mobile phone camera to vote</span>
         </div>
 
-        {/* View Live Results Shortcut */}
-        <a
-          href={resultsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.4rem',
-            color: 'var(--accent-primary)',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            padding: '0.5rem',
-            textAlign: 'center',
-          }}
-        >
-          <span>Open Live Presenter Results Screen</span>
-          <ExternalLink size={14} />
-        </a>
+        {/* Social Share Buttons */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-2">Quick Share</label>
+          <div className="grid grid-cols-3 gap-2">
+            {shareLinks.map((item) => (
+              <a
+                key={item.name}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-2xs ${item.color}`}
+              >
+                {item.icon}
+                <span>{item.name.split(' ')[0]}</span>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
