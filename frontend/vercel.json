@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/api/:match*",
+      "destination": "https://course-test-franchise-carry.trycloudflare.com/api/:match*"
+    },
+    {
+      "source": "/ws/:match*",
+      "destination": "https://course-test-franchise-carry.trycloudflare.com/ws/:match*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
