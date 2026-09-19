@@ -106,9 +106,9 @@ export const api = {
       const url = new URL(API_BASE_URL);
       return `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/ws/polls/${pollId}`;
     }
-    // When running on Vercel, connect WebSocket directly to Cloudflare tunnel since Vercel Serverless drops WS upgrades
+    // When running on Vercel, connect WebSocket directly to permanent Render cloud backend
     if (typeof window !== 'undefined' && window.location.host.includes('vercel.app')) {
-      return `wss://minneapolis-career-hook-ecommerce.trycloudflare.com/ws/polls/${pollId}`;
+      return `wss://live-polling-app-rb4v.onrender.com/ws/polls/${pollId}`;
     }
     return `${wsProtocol}//${window.location.host}/ws/polls/${pollId}`;
   }
