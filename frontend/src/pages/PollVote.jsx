@@ -24,18 +24,25 @@ export default function PollVote() {
       if (rec) setPastSelection(rec.optionIds);
     }
 
-    const fetchPoll = async () => {
+    const fetchPoll = async (silent = false) => {
       try {
         const res = await api.getPoll(id);
         setPoll(res.poll);
       } catch (err) {
-        setError(err.message || 'Poll not found or inactive');
+        if (!silent) setError(err.message || 'Poll not found or inactive');
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     };
 
-    fetchPoll();
+    fetchPoll(false);
+
+    // Silent background sync check every 4s for status changes without reloading
+    const syncInterval = setInterval(() => {
+      fetchPoll(true);
+    }, 4000);
+
+    return () => clearInterval(syncInterval);
   }, [id]);
 
   const toggleOption = (optionId) => {
@@ -99,9 +106,9 @@ export default function PollVote() {
   if (error && !poll) {
     return (
       <div style={{ maxWidth: '540px', margin: '4rem auto', padding: '0 1.5rem' }}>
-        <div className="glass-panel" style={{ padding: '2.5rem', textAlign: 'center' }}>
-          <AlertCircle size={44} color="#f43f5e" style={{ margin: '0 auto 1rem auto' }} />
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Poll Unavailable</h2>
+        <div className="glass-panel" style={{ padding: '2.5rem', textAlign: 'center', background: '#ffffff' }}>
+          <AlertCircle size={44} color="#e11d48" style={{ margin: '0 auto 1rem auto' }} />
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Poll Unavailable</h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error}</p>
           <Link to="/" className="btn-secondary">
             Go to Homepage
@@ -113,7 +120,7 @@ export default function PollVote() {
 
   return (
     <div style={{ maxWidth: '640px', margin: '2.5rem auto 5rem auto', padding: '0 1.5rem' }}>
-      <div className="glass-panel animate-fade-in" style={{ padding: '2.25rem' }}>
+      <div className="glass-panel animate-fade-in" style={{ padding: '2.25rem', background: '#ffffff' }}>
         {/* Status Header */}
         <div style={{
           display: 'flex',
@@ -130,7 +137,17 @@ export default function PollVote() {
                 <span>VOTING OPEN</span>
               </span>
             ) : (
-              <span className="btn-secondary" style={{ padding: '0.2rem 0.65rem', fontSize: '0.78rem', color: '#fda4af' }}>
+              <span style={{
+                padding: '0.2rem 0.65rem',
+                fontSize: '0.78rem',
+                color: '#b91c1c',
+                background: '#fee2e2',
+                borderRadius: '9999px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+              }}>
                 <Lock size={12} />
                 <span>POLL CLOSED</span>
               </span>
@@ -138,10 +155,11 @@ export default function PollVote() {
             {poll.allow_multiple && (
               <span style={{
                 fontSize: '0.75rem',
-                background: 'rgba(255, 255, 255, 0.06)',
+                background: '#f1f5f9',
                 padding: '0.2rem 0.6rem',
                 borderRadius: '9999px',
-                color: 'var(--text-muted)'
+                color: 'var(--text-muted)',
+                fontWeight: 500,
               }}>
                 Select Multiple
               </span>
@@ -165,7 +183,7 @@ export default function PollVote() {
         </div>
 
         {/* Question */}
-        <h1 style={{ fontSize: '1.65rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>
+        <h1 style={{ fontSize: '1.65rem', marginBottom: '0.5rem', lineHeight: 1.3, color: 'var(--text-main)' }}>
           {poll.question}
         </h1>
 
@@ -178,8 +196,8 @@ export default function PollVote() {
         {/* Already Voted Banner */}
         {alreadyVoted && (
           <div style={{
-            background: 'rgba(16, 185, 129, 0.12)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
+            background: '#ecfdf5',
+            border: '1px solid #a7f3d0',
             borderRadius: '14px',
             padding: '1rem',
             marginBottom: '1.75rem',
@@ -189,7 +207,7 @@ export default function PollVote() {
             gap: '1rem',
             flexWrap: 'wrap',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#34d399' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#047857' }}>
               <CheckCircle2 size={20} />
               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Your vote has been counted!</span>
             </div>
@@ -202,12 +220,12 @@ export default function PollVote() {
         {/* Error Alert */}
         {error && (
           <div style={{
-            background: 'rgba(244, 63, 94, 0.12)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
             borderRadius: '12px',
             padding: '0.8rem 1rem',
             marginBottom: '1.25rem',
-            color: '#fda4af',
+            color: '#be123c',
             fontSize: '0.88rem',
             display: 'flex',
             alignItems: 'center',
@@ -233,10 +251,10 @@ export default function PollVote() {
                     padding: '1.1rem 1.25rem',
                     borderRadius: '14px',
                     background: (isSelected || isPastSelected) 
-                      ? 'rgba(99, 102, 241, 0.18)' 
-                      : 'rgba(255, 255, 255, 0.03)',
+                      ? '#eef2ff' 
+                      : '#ffffff',
                     border: (isSelected || isPastSelected)
-                      ? '1.5px solid var(--accent-primary)'
+                      ? '2px solid var(--accent-primary)'
                       : '1px solid var(--border-subtle)',
                     cursor: (alreadyVoted || !poll.is_active) ? 'default' : 'pointer',
                     display: 'flex',
@@ -244,7 +262,7 @@ export default function PollVote() {
                     justifyContent: 'space-between',
                     gap: '1rem',
                     transition: 'all 0.2s ease',
-                    boxShadow: (isSelected || isPastSelected) ? '0 0 15px rgba(99, 102, 241, 0.25)' : 'none',
+                    boxShadow: (isSelected || isPastSelected) ? '0 4px 14px rgba(79, 70, 229, 0.12)' : '0 1px 3px rgba(15, 23, 42, 0.03)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -252,21 +270,21 @@ export default function PollVote() {
                       width: '24px',
                       height: '24px',
                       borderRadius: poll.allow_multiple ? '6px' : '50%',
-                      background: (isSelected || isPastSelected) ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid var(--border-subtle)',
+                      background: (isSelected || isPastSelected) ? 'var(--accent-primary)' : '#f1f5f9',
+                      border: `1.5px solid ${(isSelected || isPastSelected) ? 'var(--accent-primary)' : '#cbd5e1'}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
                       {(isSelected || isPastSelected) && <Check size={14} color="#ffffff" strokeWidth={3} />}
                     </div>
-                    <span style={{ fontSize: '1rem', fontWeight: (isSelected || isPastSelected) ? 600 : 500 }}>
+                    <span style={{ fontSize: '1rem', fontWeight: (isSelected || isPastSelected) ? 600 : 500, color: 'var(--text-main)' }}>
                       {option.text}
                     </span>
                   </div>
 
                   {isPastSelected && (
-                    <span style={{ fontSize: '0.78rem', color: '#a5b4fc', fontWeight: 600 }}>Your Choice</span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', fontWeight: 600, background: '#e0e7ff', padding: '0.15rem 0.5rem', borderRadius: '6px' }}>Your Choice</span>
                   )}
                 </div>
               );

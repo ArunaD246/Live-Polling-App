@@ -36,8 +36,9 @@ export default function ShareModal({ poll, isOpen, onClose }) {
       position: 'fixed',
       inset: 0,
       zIndex: 100,
-      background: 'rgba(5, 8, 15, 0.85)',
-      backdropFilter: 'blur(10px)',
+      background: 'rgba(15, 23, 42, 0.45)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -48,8 +49,9 @@ export default function ShareModal({ poll, isOpen, onClose }) {
         width: '100%',
         padding: '2rem',
         position: 'relative',
-        background: '#0d1322',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
+        background: '#ffffff',
+        border: '1px solid var(--border-subtle)',
+        boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.18)',
       }}>
         {/* Close Button */}
         <button
@@ -58,11 +60,11 @@ export default function ShareModal({ poll, isOpen, onClose }) {
             position: 'absolute',
             top: '1.25rem',
             right: '1.25rem',
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: '#f1f5f9',
             border: 'none',
             color: 'var(--text-muted)',
             borderRadius: '50%',
-            padding: '0.4rem',
+            padding: '0.45rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -73,10 +75,10 @@ export default function ShareModal({ poll, isOpen, onClose }) {
 
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <div style={{
-            width: '46px',
-            height: '46px',
+            width: '48px',
+            height: '48px',
             borderRadius: '12px',
-            background: 'rgba(99, 102, 241, 0.15)',
+            background: 'rgba(79, 70, 229, 0.1)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -85,7 +87,7 @@ export default function ShareModal({ poll, isOpen, onClose }) {
           }}>
             <Share2 size={24} />
           </div>
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.35rem' }}>Share Live Poll</h2>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.35rem', color: 'var(--text-main)' }}>Share Live Poll</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '340px', margin: '0 auto' }}>
             Audience can scan the QR code or click the link to vote immediately.
           </p>
@@ -98,7 +100,8 @@ export default function ShareModal({ poll, isOpen, onClose }) {
           borderRadius: '16px',
           width: 'fit-content',
           margin: '0 auto 1.5rem auto',
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)',
+          border: '1px solid var(--border-subtle)',
+          boxShadow: '0 4px 16px rgba(15, 23, 42, 0.06)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -107,7 +110,7 @@ export default function ShareModal({ poll, isOpen, onClose }) {
             value={voteUrl}
             size={180}
             bgColor={"#ffffff"}
-            fgColor={"#0a0d16"}
+            fgColor={"#0f172a"}
             level={"M"}
             includeMargin={false}
           />
@@ -118,7 +121,7 @@ export default function ShareModal({ poll, isOpen, onClose }) {
           display: 'flex',
           gap: '0.5rem',
           marginBottom: '1.5rem',
-          background: 'rgba(255, 255, 255, 0.04)',
+          background: '#f8fafc',
           border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '0.35rem',
@@ -153,15 +156,15 @@ export default function ShareModal({ poll, isOpen, onClose }) {
         {/* Share buttons */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
           <button onClick={shareWhatsApp} className="btn-secondary" style={{ padding: '0.55rem', fontSize: '0.8rem' }}>
-            <MessageCircle size={15} color="#25D366" />
+            <MessageCircle size={15} color="#16a34a" />
             <span>WhatsApp</span>
           </button>
           <button onClick={shareTwitter} className="btn-secondary" style={{ padding: '0.55rem', fontSize: '0.8rem' }}>
-            <Send size={15} color="#38bdf8" />
+            <Send size={15} color="#0284c7" />
             <span>Twitter/X</span>
           </button>
           <button onClick={shareTelegram} className="btn-secondary" style={{ padding: '0.55rem', fontSize: '0.8rem' }}>
-            <Send size={15} color="#60a5fa" />
+            <Send size={15} color="#2563eb" />
             <span>Telegram</span>
           </button>
         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   PlusCircle, BarChart2, Share2, ToggleLeft, ToggleRight, Trash2, 
-  ExternalLink, Download, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw 
+  ExternalLink, Download, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Zap 
 } from 'lucide-react';
 import { api } from '../services/api';
 import ShareModal from '../components/ShareModal';
@@ -13,20 +13,27 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [activeSharePoll, setActiveSharePoll] = useState(null);
 
-  const fetchPolls = async () => {
-    setLoading(true);
+  const fetchPolls = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const res = await api.getMyPolls();
       setPolls(res.polls || []);
     } catch (err) {
-      setError(err.message || 'Failed to load your polls');
+      if (showLoading) setError(err.message || 'Failed to load your polls');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPolls();
+    fetchPolls(true);
+
+    // Auto-update dashboard polls silently every 3.5 seconds with ZERO page reload
+    const interval = setInterval(() => {
+      fetchPolls(false);
+    }, 3500);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleToggleStatus = async (pollId, currentStatus) => {
@@ -86,14 +93,20 @@ export default function Dashboard() {
         marginBottom: '2rem',
       }}>
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Creator Dashboard</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Manage your active polls and monitor live audience responses.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+            <h1 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Creator Dashboard</h1>
+            <span className="badge-live" style={{ fontSize: '0.75rem' }}>
+              <span className="pulse-dot"></span>
+              Auto-Updating Live
+            </span>
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Manage your active polls and monitor live audience responses in real-time.</p>
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={fetchPolls} className="btn-secondary" title="Refresh Polls">
+          <button onClick={() => fetchPolls(true)} className="btn-secondary" title="Refresh Polls">
             <RefreshCw size={16} />
-            <span>Refresh</span>
+            <span>Sync</span>
           </button>
           <Link to="/create" className="btn-primary">
             <PlusCircle size={18} />
@@ -109,16 +122,16 @@ export default function Dashboard() {
         gap: '1.25rem',
         marginBottom: '2.5rem',
       }}>
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Total Polls Created</div>
-          <div style={{ fontSize: '2.2rem', fontWeight: 800 }}>{polls.length}</div>
+        <div className="glass-card" style={{ padding: '1.5rem', background: '#ffffff' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.35rem', fontWeight: 500 }}>Total Polls Created</div>
+          <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{polls.length}</div>
         </div>
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Active Live Polls</div>
+        <div className="glass-card" style={{ padding: '1.5rem', background: '#ffffff' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.35rem', fontWeight: 500 }}>Active Live Polls</div>
           <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{activePollsCount}</div>
         </div>
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Total Votes Cast</div>
+        <div className="glass-card" style={{ padding: '1.5rem', background: '#ffffff' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.35rem', fontWeight: 500 }}>Total Votes Cast</div>
           <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--accent-primary)' }}>{totalVotesCount}</div>
         </div>
       </div>
@@ -126,12 +139,12 @@ export default function Dashboard() {
       {/* Error State */}
       {error && (
         <div style={{
-          background: 'rgba(244, 63, 94, 0.12)',
-          border: '1px solid rgba(244, 63, 94, 0.3)',
+          background: '#fff1f2',
+          border: '1px solid #fecdd3',
           borderRadius: '12px',
           padding: '1rem',
           marginBottom: '1.5rem',
-          color: '#fda4af',
+          color: '#be123c',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
@@ -148,9 +161,9 @@ export default function Dashboard() {
           <p>Loading your polls...</p>
         </div>
       ) : polls.length === 0 ? (
-        <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+        <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 2rem', background: '#ffffff' }}>
           <BarChart2 size={48} color="var(--text-dim)" style={{ margin: '0 auto 1rem auto' }} />
-          <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>No polls created yet</h3>
+          <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>No polls created yet</h3>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '400px', margin: '0 auto 1.5rem auto' }}>
             Get started by launching your first live poll for your audience or team.
           </p>
@@ -162,7 +175,7 @@ export default function Dashboard() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {polls.map((poll) => (
-            <div key={poll.id} className="glass-card" style={{ padding: '1.5rem' }}>
+            <div key={poll.id} className="glass-card" style={{ padding: '1.5rem', background: '#ffffff' }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'flex-start',
@@ -173,22 +186,30 @@ export default function Dashboard() {
               }}>
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-                    <span className={poll.is_active ? "badge-live" : "btn-secondary"} style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}>
-                      {poll.is_active ? (
-                        <>
-                          <span className="pulse-dot"></span>
-                          <span>LIVE</span>
-                        </>
-                      ) : (
-                        <span>CLOSED</span>
-                      )}
-                    </span>
+                    {poll.is_active ? (
+                      <span className="badge-live" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}>
+                        <span className="pulse-dot"></span>
+                        <span>LIVE</span>
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: '0.75rem',
+                        padding: '0.2rem 0.6rem',
+                        background: '#f1f5f9',
+                        color: '#64748b',
+                        borderRadius: '9999px',
+                        fontWeight: 600,
+                        border: '1px solid #e2e8f0',
+                      }}>
+                        CLOSED
+                      </span>
+                    )}
                     <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>
                       Created {new Date(poll.created_at).toLocaleDateString()}
                     </span>
                   </div>
 
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '0.35rem' }}>{poll.question}</h3>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '0.35rem', color: 'var(--text-main)' }}>{poll.question}</h3>
                   {poll.description && (
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '0.5rem' }}>
                       {poll.description}
@@ -207,7 +228,7 @@ export default function Dashboard() {
                     style={{ fontSize: '0.8rem', padding: '0.45rem 0.8rem' }}
                     title={poll.is_active ? "Close poll" : "Re-open poll"}
                   >
-                    {poll.is_active ? <ToggleRight size={18} color="#10b981" /> : <ToggleLeft size={18} color="#64748b" />}
+                    {poll.is_active ? <ToggleRight size={18} color="#059669" /> : <ToggleLeft size={18} color="#94a3b8" />}
                     <span>{poll.is_active ? 'Active' : 'Closed'}</span>
                   </button>
 

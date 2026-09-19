@@ -49,7 +49,7 @@ export default function Auth({ initialMode = 'login' }) {
       margin: '4rem auto',
       padding: '0 1.5rem',
     }}>
-      <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem' }}>
+      <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem', background: '#ffffff' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
@@ -61,11 +61,11 @@ export default function Auth({ initialMode = 'login' }) {
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: '1rem',
-            boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)',
+            boxShadow: '0 4px 15px rgba(79, 70, 229, 0.3)',
           }}>
             {isRegister ? <UserPlus size={24} color="#fff" /> : <LogIn size={24} color="#fff" />}
           </div>
-          <h1 style={{ fontSize: '1.75rem', marginBottom: '0.4rem' }}>
+          <h1 style={{ fontSize: '1.75rem', marginBottom: '0.4rem', color: 'var(--text-main)' }}>
             {isRegister ? 'Create Your Account' : 'Welcome Back'}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -76,7 +76,7 @@ export default function Auth({ initialMode = 'login' }) {
         {/* Tab Switcher */}
         <div style={{
           display: 'flex',
-          background: 'rgba(255, 255, 255, 0.04)',
+          background: '#f1f5f9',
           padding: '0.3rem',
           borderRadius: '12px',
           marginBottom: '1.75rem',
@@ -91,9 +91,10 @@ export default function Auth({ initialMode = 'login' }) {
               borderRadius: '8px',
               fontSize: '0.9rem',
               fontWeight: 600,
-              background: !isRegister ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
-              color: !isRegister ? '#fff' : 'var(--text-muted)',
-              border: !isRegister ? '1px solid rgba(99, 102, 241, 0.4)' : 'none',
+              background: !isRegister ? '#ffffff' : 'transparent',
+              color: !isRegister ? 'var(--accent-primary)' : 'var(--text-muted)',
+              border: !isRegister ? '1px solid var(--border-subtle)' : 'none',
+              boxShadow: !isRegister ? '0 2px 6px rgba(15, 23, 42, 0.08)' : 'none',
             }}
           >
             Sign In
@@ -107,9 +108,10 @@ export default function Auth({ initialMode = 'login' }) {
               borderRadius: '8px',
               fontSize: '0.9rem',
               fontWeight: 600,
-              background: isRegister ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
-              color: isRegister ? '#fff' : 'var(--text-muted)',
-              border: isRegister ? '1px solid rgba(99, 102, 241, 0.4)' : 'none',
+              background: isRegister ? '#ffffff' : 'transparent',
+              color: isRegister ? 'var(--accent-primary)' : 'var(--text-muted)',
+              border: isRegister ? '1px solid var(--border-subtle)' : 'none',
+              boxShadow: isRegister ? '0 2px 6px rgba(15, 23, 42, 0.08)' : 'none',
             }}
           >
             Register
@@ -119,12 +121,12 @@ export default function Auth({ initialMode = 'login' }) {
         {/* Error Alert */}
         {error && (
           <div style={{
-            background: 'rgba(244, 63, 94, 0.12)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
             borderRadius: '10px',
             padding: '0.75rem 1rem',
             marginBottom: '1.25rem',
-            color: '#fda4af',
+            color: '#be123c',
             fontSize: '0.85rem',
             display: 'flex',
             alignItems: 'center',
@@ -139,7 +141,7 @@ export default function Auth({ initialMode = 'login' }) {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           {isRegister && (
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--text-main)' }}>
                 Full Name
               </label>
               <div style={{ position: 'relative' }}>
@@ -158,7 +160,7 @@ export default function Auth({ initialMode = 'login' }) {
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--text-main)' }}>
               Email Address
             </label>
             <div style={{ position: 'relative' }}>
@@ -176,7 +178,7 @@ export default function Auth({ initialMode = 'login' }) {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--text-main)' }}>
               Password
             </label>
             <div style={{ position: 'relative' }}>

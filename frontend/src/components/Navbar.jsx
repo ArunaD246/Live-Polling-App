@@ -32,9 +32,11 @@ export default function Navbar() {
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      background: 'rgba(9, 13, 22, 0.85)',
+      background: 'rgba(255, 255, 255, 0.88)',
       backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       borderBottom: '1px solid var(--border-subtle)',
+      boxShadow: '0 2px 12px rgba(15, 23, 42, 0.04)',
       padding: '0.85rem 1.5rem',
     }}>
       <div style={{
@@ -52,16 +54,16 @@ export default function Navbar() {
             width: '38px',
             height: '38px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 15px rgba(99, 102, 241, 0.4)',
+            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)',
           }}>
             <Radio size={22} color="#ffffff" />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)' }}>
               <span>Pulse<span style={{ color: 'var(--accent-primary)' }}>Poll</span></span>
               <span className="badge-live" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
                 <span className="pulse-dot" style={{ width: '6px', height: '6px' }}></span>
@@ -76,14 +78,15 @@ export default function Navbar() {
           {serverOnline !== null && (
             <div style={{
               fontSize: '0.75rem',
-              color: serverOnline ? '#34d399' : '#f87171',
+              color: serverOnline ? '#047857' : '#b91c1c',
+              fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
-              background: 'rgba(255, 255, 255, 0.03)',
+              background: serverOnline ? '#ecfdf5' : '#fef2f2',
               padding: '0.3rem 0.65rem',
               borderRadius: '20px',
-              border: '1px solid var(--border-subtle)',
+              border: `1px solid ${serverOnline ? '#a7f3d0' : '#fecaca'}`,
             }}>
               <span style={{
                 width: '6px',
@@ -112,13 +115,13 @@ export default function Navbar() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  background: 'rgba(255,255,255,0.05)',
+                  background: '#f1f5f9',
                   padding: '0.35rem 0.75rem',
                   borderRadius: '20px',
                   border: '1px solid var(--border-subtle)',
                 }}>
                   <User size={14} color="var(--accent-primary)" />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{currentUser.name}</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{currentUser.name}</span>
                 </div>
 
                 <button onClick={handleLogout} className="btn-secondary" title="Logout" style={{ padding: '0.45rem', borderRadius: '50%' }}>

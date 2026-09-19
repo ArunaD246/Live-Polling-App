@@ -89,13 +89,13 @@ export default function CreatePoll() {
         <span>Back</span>
       </button>
 
-      <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem' }}>
+      <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem', background: '#ffffff' }}>
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
             <Sparkles size={16} />
             <span>POLL BUILDER</span>
           </div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Create a New Live Poll</h1>
+          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Create a New Live Poll</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
             Audience members will be able to vote in real-time via shareable link or scannable QR code.
           </p>
@@ -103,12 +103,12 @@ export default function CreatePoll() {
 
         {error && (
           <div style={{
-            background: 'rgba(244, 63, 94, 0.12)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
             borderRadius: '12px',
             padding: '0.85rem 1rem',
             marginBottom: '1.5rem',
-            color: '#fda4af',
+            color: '#be123c',
             fontSize: '0.9rem',
             display: 'flex',
             alignItems: 'center',
@@ -122,7 +122,7 @@ export default function CreatePoll() {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           {/* Question Input */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
               Poll Question <span style={{ color: 'var(--accent-rose)' }}>*</span>
             </label>
             <input
@@ -141,7 +141,7 @@ export default function CreatePoll() {
 
           {/* Optional Description */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
               Description / Context <span style={{ color: 'var(--text-dim)', fontWeight: 400 }}>(Optional)</span>
             </label>
             <textarea
@@ -157,7 +157,7 @@ export default function CreatePoll() {
           {/* Options List */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+              <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 Voting Options <span style={{ color: 'var(--accent-rose)' }}>*</span>
               </label>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -172,14 +172,14 @@ export default function CreatePoll() {
                     width: '32px',
                     height: '32px',
                     borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    background: '#eef2ff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.85rem',
                     fontWeight: 700,
                     color: 'var(--accent-primary)',
-                    border: '1px solid var(--border-subtle)',
+                    border: '1px solid #c7d2fe',
                   }}>
                     {idx + 1}
                   </div>
@@ -221,7 +221,7 @@ export default function CreatePoll() {
 
           {/* Advanced Settings */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.02)',
+            background: '#f8fafc',
             padding: '1.25rem',
             borderRadius: '14px',
             border: '1px solid var(--border-subtle)',
@@ -234,7 +234,7 @@ export default function CreatePoll() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <CheckSquare size={18} color="var(--accent-primary)" />
                 <div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>Allow Multiple Selections</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>Allow Multiple Selections</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Voters can choose more than one option</div>
                 </div>
               </div>
@@ -251,7 +251,7 @@ export default function CreatePoll() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <Clock size={18} color="var(--accent-primary)" />
                 <div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>Poll Expiration</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>Poll Expiration</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Automatically close voting after time elapses</div>
                 </div>
               </div>

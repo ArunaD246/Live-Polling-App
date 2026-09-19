@@ -1,24 +1,28 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:alpine AS builder
 
 WORKDIR /app
 
-# Dependencies
+# Install git (needed for some go dependencies)
+RUN apk add --no-cache git ca-certificates
+
+# Download dependencies first (cached layer)
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Source
+# Copy source and build
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o server .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o server .
 
-# Run stage
+# Run stage - minimal image
 FROM alpine:latest
 WORKDIR /app
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates tzdata
 
 COPY --from=builder /app/server .
 
 EXPOSE 8080
 ENV PORT=8080
+ENV GIN_MODE=release
 
 CMD ["./server"]

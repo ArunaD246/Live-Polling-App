@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   BarChart2, Users, Share2, Maximize2, Minimize2, Crown, 
-  Lock, CheckCircle2, Radio, Vote, Sparkles, RefreshCw 
+  Lock, CheckCircle2, Radio, Vote, Sparkles, RefreshCw, Zap 
 } from 'lucide-react';
 import { api } from '../services/api';
 import ShareModal from '../components/ShareModal';
@@ -20,83 +20,120 @@ export default function PollResults() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [lastSynced, setLastSynced] = useState(null);
 
   const wsRef = useRef(null);
   const containerRef = useRef(null);
 
   // 1. Fetch initial poll data via HTTP
+  const fetchPollData = async (silent = false) => {
+    try {
+      const res = await api.getPoll(id);
+      const p = res.poll;
+      setPoll(p);
+      setIsActive(p.is_active);
+      setTotalVotes(p.total_votes || 0);
+
+      // Build vote map from options
+      const vMap = {};
+      p.options.forEach(opt => {
+        vMap[opt.id] = opt.vote_count || 0;
+      });
+      setVotes(vMap);
+      setLastSynced(new Date());
+    } catch (err) {
+      if (!silent) setError(err.message || 'Failed to load poll');
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPoll = async () => {
-      try {
-        const res = await api.getPoll(id);
-        const p = res.poll;
-        setPoll(p);
-        setIsActive(p.is_active);
-        setTotalVotes(p.total_votes || 0);
-
-        // Build vote map from options
-        const vMap = {};
-        p.options.forEach(opt => {
-          vMap[opt.id] = opt.vote_count || 0;
-        });
-        setVotes(vMap);
-      } catch (err) {
-        setError(err.message || 'Failed to load poll');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPoll();
+    fetchPollData(false);
   }, [id]);
 
-  // 2. Establish Real-Time WebSocket Connection
+  // 2. High-reliability Auto-Sync (Every 1.5 seconds) - Updates without ANY page refresh!
+  useEffect(() => {
+    let isCancelled = false;
+    const syncInterval = setInterval(async () => {
+      try {
+        const res = await api.getPoll(id);
+        if (!isCancelled && res?.poll) {
+          const p = res.poll;
+          setPoll(p);
+          setIsActive(p.is_active);
+          setTotalVotes(p.total_votes || 0);
+
+          const vMap = {};
+          p.options.forEach(opt => {
+            vMap[opt.id] = opt.vote_count || 0;
+          });
+          setVotes(vMap);
+          setLastSynced(new Date());
+        }
+      } catch (err) {
+        // silent background sync
+      }
+    }, 1500);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(syncInterval);
+    };
+  }, [id]);
+
+  // 3. Establish Real-Time WebSocket Connection (for sub-second event push)
   useEffect(() => {
     let reconnectTimer;
     let isSubscribed = true;
 
     const connectWebSocket = () => {
-      const wsUrl = api.getWebSocketUrl(id);
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
+      try {
+        const wsUrl = api.getWebSocketUrl(id);
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
 
-      ws.onopen = () => {
-        if (!isSubscribed) return;
-        setWsConnected(true);
-      };
+        ws.onopen = () => {
+          if (!isSubscribed) return;
+          setWsConnected(true);
+        };
 
-      ws.onmessage = (event) => {
-        if (!isSubscribed) return;
-        try {
-          const data = JSON.parse(event.data);
+        ws.onmessage = (event) => {
+          if (!isSubscribed) return;
+          try {
+            const data = JSON.parse(event.data);
 
-          if (data.votes) {
-            setVotes(data.votes);
+            if (data.votes) {
+              setVotes(data.votes);
+            }
+            if (data.total_votes !== undefined) {
+              setTotalVotes(data.total_votes);
+            }
+            if (data.active_viewers !== undefined) {
+              setActiveViewers(data.active_viewers);
+            }
+            if (data.is_active !== undefined) {
+              setIsActive(data.is_active);
+            }
+            setLastSynced(new Date());
+          } catch (err) {
+            console.error("WebSocket message parse error:", err);
           }
-          if (data.total_votes !== undefined) {
-            setTotalVotes(data.total_votes);
-          }
-          if (data.active_viewers !== undefined) {
-            setActiveViewers(data.active_viewers);
-          }
-          if (data.is_active !== undefined) {
-            setIsActive(data.is_active);
-          }
-        } catch (err) {
-          console.error("WebSocket message parse error:", err);
-        }
-      };
+        };
 
-      ws.onclose = () => {
-        if (!isSubscribed) return;
-        setWsConnected(false);
-        // Attempt reconnect in 2 seconds
-        reconnectTimer = setTimeout(connectWebSocket, 2500);
-      };
+        ws.onclose = () => {
+          if (!isSubscribed) return;
+          setWsConnected(false);
+          // Attempt reconnect in 3 seconds
+          reconnectTimer = setTimeout(connectWebSocket, 3000);
+        };
 
-      ws.onerror = () => {
-        ws.close();
-      };
+        ws.onerror = () => {
+          ws.close();
+        };
+      } catch (e) {
+        console.log("WebSocket init exception:", e);
+      }
     };
 
     connectWebSocket();
@@ -144,8 +181,8 @@ export default function PollResults() {
   if (error || !poll) {
     return (
       <div style={{ maxWidth: '540px', margin: '4rem auto', padding: '0 1.5rem' }}>
-        <div className="glass-panel" style={{ padding: '2.5rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Poll Unavailable</h2>
+        <div className="glass-panel" style={{ padding: '2.5rem', textAlign: 'center', background: '#ffffff' }}>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Poll Unavailable</h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error || 'Poll not found'}</p>
           <Link to="/" className="btn-secondary">Go to Home</Link>
         </div>
@@ -167,10 +204,10 @@ export default function PollResults() {
         margin: isFullscreen ? '0' : '2.5rem auto 5rem auto',
         padding: isFullscreen ? '3rem' : '0 1.5rem',
         minHeight: isFullscreen ? '100vh' : 'auto',
-        background: isFullscreen ? '#070a12' : 'transparent',
+        background: isFullscreen ? '#f8fafc' : 'transparent',
       }}
     >
-      <div className="glass-panel animate-fade-in" style={{ padding: isFullscreen ? '3.5rem' : '2.5rem' }}>
+      <div className="glass-panel animate-fade-in" style={{ padding: isFullscreen ? '3.5rem' : '2.5rem', background: '#ffffff' }}>
         {/* Top Header Bar */}
         <div style={{
           display: 'flex',
@@ -198,25 +235,21 @@ export default function PollResults() {
               )}
             </span>
 
-            {/* Realtime WebSocket Indicator */}
+            {/* Realtime Auto-Sync Status Badge */}
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
               fontSize: '0.78rem',
-              color: wsConnected ? '#34d399' : '#fbbf24',
-              background: 'rgba(255, 255, 255, 0.04)',
+              color: '#059669',
+              background: '#ecfdf5',
               padding: '0.3rem 0.65rem',
               borderRadius: '9999px',
-              border: '1px solid var(--border-subtle)',
+              border: '1px solid #a7f3d0',
+              fontWeight: 600,
             }}>
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: wsConnected ? '#10b981' : '#f59e0b',
-              }} />
-              <span>{wsConnected ? 'Redis Pub/Sub Connected' : 'Reconnecting stream...'}</span>
+              <span className="pulse-dot" style={{ width: '6px', height: '6px' }}></span>
+              <span>Auto-Updating Live (No Reload)</span>
             </span>
 
             {/* Active Viewers Count */}
@@ -226,13 +259,14 @@ export default function PollResults() {
               gap: '0.4rem',
               fontSize: '0.78rem',
               color: 'var(--text-muted)',
-              background: 'rgba(255, 255, 255, 0.04)',
+              background: '#f1f5f9',
               padding: '0.3rem 0.65rem',
               borderRadius: '9999px',
               border: '1px solid var(--border-subtle)',
+              fontWeight: 500,
             }}>
-              <Users size={13} color="var(--accent-cyan)" />
-              <span>{activeViewers} Watching Live</span>
+              <Users size={13} color="var(--accent-primary)" />
+              <span>{activeViewers} Watching</span>
             </span>
           </div>
 
@@ -266,6 +300,7 @@ export default function PollResults() {
             marginBottom: '0.6rem',
             lineHeight: 1.25,
             letterSpacing: '-0.02em',
+            color: 'var(--text-main)',
           }}>
             {poll.question}
           </h1>
@@ -281,33 +316,33 @@ export default function PollResults() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'rgba(255, 255, 255, 0.02)',
+          background: '#f8fafc',
           border: '1px solid var(--border-subtle)',
           padding: '0.85rem 1.25rem',
           borderRadius: '12px',
           marginBottom: '2rem',
         }}>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Total Audience Responses</span>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>Total Audience Responses</span>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
             {totalVotes} {totalVotes === 1 ? 'Vote' : 'Votes'}
           </span>
         </div>
 
         {/* Live Option Bars */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2.5rem' }}>
           {poll.options.map((option, index) => {
             const voteCount = votes[option.id] !== undefined ? votes[option.id] : (option.vote_count || 0);
             const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(1) : '0.0';
             const isLeading = highestVote > 0 && voteCount === highestVote;
 
-            // Harmonious accent color sequence
+            // Harmonious, vibrant gradient sequence
             const barGradients = [
-              'linear-gradient(90deg, #6366f1, #818cf8)',
-              'linear-gradient(90deg, #06b6d4, #38bdf8)',
-              'linear-gradient(90deg, #10b981, #34d399)',
-              'linear-gradient(90deg, #f59e0b, #fbbf24)',
-              'linear-gradient(90deg, #ec4899, #f472b6)',
-              'linear-gradient(90deg, #8b5cf6, #c084fc)',
+              'linear-gradient(90deg, #4f46e5, #6366f1)',
+              'linear-gradient(90deg, #0284c7, #38bdf8)',
+              'linear-gradient(90deg, #059669, #34d399)',
+              'linear-gradient(90deg, #d97706, #fbbf24)',
+              'linear-gradient(90deg, #db2777, #f472b6)',
+              'linear-gradient(90deg, #7c3aed, #a855f7)',
             ];
             const activeGradient = barGradients[index % barGradients.length];
 
@@ -315,14 +350,14 @@ export default function PollResults() {
               <div
                 key={option.id}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: isLeading ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid var(--border-subtle)',
+                  background: isLeading ? '#f5f3ff' : '#ffffff',
+                  border: isLeading ? '1.5px solid #818cf8' : '1px solid var(--border-subtle)',
                   borderRadius: '16px',
                   padding: isFullscreen ? '1.5rem 1.75rem' : '1.2rem 1.4rem',
                   position: 'relative',
                   overflow: 'hidden',
                   transition: 'all 0.3s ease',
-                  boxShadow: isLeading ? '0 0 20px rgba(99, 102, 241, 0.15)' : 'none',
+                  boxShadow: isLeading ? '0 4px 20px rgba(99, 102, 241, 0.12)' : '0 2px 8px rgba(15, 23, 42, 0.03)',
                 }}
               >
                 {/* Header row: Option Text, Leading badge, Count & Percentage */}
@@ -338,7 +373,7 @@ export default function PollResults() {
                     <span style={{
                       fontSize: isFullscreen ? '1.25rem' : '1.05rem',
                       fontWeight: 600,
-                      color: isLeading ? 'var(--text-main)' : 'var(--text-main)',
+                      color: 'var(--text-main)',
                     }}>
                       {option.text}
                     </span>
@@ -349,13 +384,13 @@ export default function PollResults() {
                         gap: '0.3rem',
                         fontSize: '0.72rem',
                         fontWeight: 700,
-                        color: '#fbbf24',
-                        background: 'rgba(245, 158, 11, 0.15)',
-                        padding: '0.2rem 0.5rem',
+                        color: '#b45309',
+                        background: '#fef3c7',
+                        padding: '0.2rem 0.55rem',
                         borderRadius: '9999px',
-                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                        border: '1px solid #fde68a',
                       }}>
-                        <Crown size={12} />
+                        <Crown size={12} color="#b45309" />
                         <span>LEADING</span>
                       </span>
                     )}
@@ -366,6 +401,7 @@ export default function PollResults() {
                       fontSize: isFullscreen ? '1.5rem' : '1.25rem',
                       fontWeight: 800,
                       fontFamily: 'var(--font-heading)',
+                      color: 'var(--text-main)',
                     }}>
                       {percentage}%
                     </span>
